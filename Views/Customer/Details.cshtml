@@ -1,0 +1,105 @@
+@model CafeMenu.Models.ViewModels.ProductDetailViewModel
+@{
+    ViewData["Title"] = Model.ProductName;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="@(string.IsNullOrEmpty(Model.ImagePath) ? "/images/no-image.png" : Model.ImagePath)" 
+                 class="img-fluid rounded" alt="@Model.ProductName">
+        </div>
+        <div class="col-md-6">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index")">Menü</a></li>
+                    <li class="breadcrumb-item">
+                        <a href="@Url.Action("Category", new { id = Model.CategoryId })">
+                            @Model.CategoryName
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">@Model.ProductName</li>
+                </ol>
+            </nav>
+
+            <h1 class="mb-4">@Model.ProductName</h1>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">
+                            <strong>
+                                @Model.FormattedPrice
+                            </strong>
+                        </h3>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
+                                Para Birimi: @Model.SelectedCurrency
+                            </button>
+                            <div class="dropdown-menu">
+                                @foreach (var rate in Model.ExchangeRates)
+                                {
+                                    <a class="dropdown-item @(Model.SelectedCurrency == rate.Key ? "active" : "")" 
+                                       href="@Url.Action("Product", new { id = Model.ProductId, currency = rate.Key })">
+                                        @rate.Key
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.Properties != null && Model.Properties.Any())
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Ürün Özellikleri</h3>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row">
+                            @foreach (var property in Model.Properties)
+                            {
+                                <dt class="col-sm-4">@property.Key</dt>
+                                <dd class="col-sm-8">@property.Value</dd>
+                            }
+                        </dl>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/exchangeRateHub")
+            .build();
+
+        let currentRates = @Html.Raw(Json.Serialize(Model.ExchangeRates));
+        const selectedCurrency = '@Model.SelectedCurrency';
+        const priceElement = document.querySelector('[data-price]');
+        const originalPrice = parseFloat(priceElement.dataset.price);
+
+        connection.on("ReceiveExchangeRates", (rates) => {
+            currentRates = rates;
+            updatePrice();
+        });
+
+        connection.start()
+            .then(() => console.log("SignalR Bağlantısı Kuruldu"))
+            .catch(err => console.error(err));
+
+        function updatePrice() {
+            if (selectedCurrency !== 'TRY') {
+                const rate = currentRates[selectedCurrency];
+                if (rate) {
+                    const convertedPrice = originalPrice / rate;
+                    priceElement.textContent = `${convertedPrice.toFixed(2)} ${selectedCurrency}`;
+                }
+            }
+        }
+    </script>
+} 

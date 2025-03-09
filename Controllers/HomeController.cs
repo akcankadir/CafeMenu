@@ -23,6 +23,12 @@ public class HomeController : Controller
         return View();
     }
 
+    [Route("/health")]
+    public IActionResult Health()
+    {
+        return Ok(new { status = "healthy", timestamp = DateTime.UtcNow });
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

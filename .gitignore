@@ -361,3 +361,46 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# VS Code files for those working on multiple tools
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Local History for Visual Studio Code
+.history/
+
+# Windows Installer files from build outputs
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Sensitive configuration files
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Staging.json
+secrets.json
+*.env
+
+# Logs
+logs/
+*.log
+
+# User uploaded content
+wwwroot/uploads/
+wwwroot/images/products/
+wwwroot/images/categories/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3

@@ -1,0 +1,138 @@
+@model CafeMenu.Models.ViewModels.ProfileViewModel
+@{
+    ViewData["Title"] = "Profil";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card card-primary card-outline">
+                <div class="card-body box-profile">
+                    <div class="text-center">
+                        <img class="profile-user-img img-fluid img-circle"
+                             src="~/images/user.png"
+                             alt="Profil Resmi">
+                    </div>
+
+                    <h3 class="profile-username text-center">@Model.FirstName @Model.LastName</h3>
+
+                    <p class="text-muted text-center">@Model.Username</p>
+
+                    <ul class="list-group list-group-unbordered mb-3">
+                        <li class="list-group-item">
+                            <b>E-posta</b> <a class="float-right">@Model.Email</a>
+                        </li>
+                        <li class="list-group-item">
+                            <b>Roller</b> <a class="float-right">@string.Join(", ", Model.Roles)</a>
+                        </li>
+                    </ul>
+
+                    <a href="#" class="btn btn-primary btn-block" data-toggle="modal" data-target="#changePasswordModal">
+                        <i class="fas fa-key"></i> Şifre Değiştir
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Profil Bilgileri</h3>
+                </div>
+                <form asp-action="Profile" method="post">
+                    <div class="card-body">
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                @TempData["SuccessMessage"]
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        }
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="UserId" />
+                        <input type="hidden" asp-for="Username" />
+
+                        <div class="form-group">
+                            <label asp-for="Email"></label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="FirstName"></label>
+                            <input asp-for="FirstName" class="form-control" />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="LastName"></label>
+                            <input asp-for="LastName" class="form-control" />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Şifre Değiştirme Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form asp-action="ChangePassword" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changePasswordModalLabel">Şifre Değiştir</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="currentPassword">Mevcut Şifre</label>
+                        <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">Yeni Şifre</label>
+                        <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Yeni Şifre (Tekrar)</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">Şifreyi Değiştir</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function () {
+            $('form').on('submit', function (e) {
+                if ($(this).attr('action').includes('ChangePassword')) {
+                    var newPassword = $('#newPassword').val();
+                    var confirmPassword = $('#confirmPassword').val();
+
+                    if (newPassword !== confirmPassword) {
+                        e.preventDefault();
+                        alert('Yeni şifre ve tekrarı eşleşmiyor!');
+                    }
+                }
+            });
+        });
+    </script>
+} 

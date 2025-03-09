@@ -1,0 +1,166 @@
+@model CafeMenu.Models.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Dashboard</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <!-- Kategori İstatistikleri -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-chart-pie mr-1"></i>
+                            Kategori Bazlı Ürün Sayıları
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" style="position: relative; height:50vh;">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Döviz Kurları -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-money-bill-wave mr-1"></i>
+                            Güncel Döviz Kurları
+                        </h3>
+                        <div class="card-tools">
+                            <small class="text-muted" id="lastUpdateTime"></small>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Para Birimi</th>
+                                        <th>Kur</th>
+                                        <th>Değişim</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="exchangeRatesTable">
+                                    @foreach (var rate in Model.ExchangeRates)
+                                    {
+                                        <tr>
+                                            <td>@rate.CurrencyCode</td>
+                                            <td>@rate.Rate.ToString("N4")</td>
+                                            <td id="change_@rate.CurrencyCode">-</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        // Kategori grafiği
+        const categoryData = @Html.Raw(Json.Serialize(Model.CategoryStats));
+        const categoryNames = categoryData.map(c => c.categoryName);
+        const productCounts = categoryData.map(c => c.productCount);
+
+        const ctx = document.getElementById('categoryChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: categoryNames,
+                datasets: [{
+                    label: 'Ürün Sayısı',
+                    data: productCounts,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+
+        // SignalR bağlantısı
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/exchangeRateHub")
+            .build();
+
+        let previousRates = {};
+        Model.ExchangeRates.forEach(rate => {
+            previousRates[rate.currencyCode] = rate.rate;
+        });
+
+        connection.on("ReceiveExchangeRates", (rates) => {
+            const table = document.getElementById('exchangeRatesTable');
+            table.innerHTML = '';
+
+            Object.entries(rates).forEach(([currency, rate]) => {
+                const row = table.insertRow();
+                row.insertCell(0).textContent = currency;
+                row.insertCell(1).textContent = parseFloat(rate).toFixed(4);
+
+                const changeCell = row.insertCell(2);
+                const previousRate = previousRates[currency];
+                if (previousRate) {
+                    const change = ((rate - previousRate) / previousRate) * 100;
+                    const changeText = change.toFixed(2) + '%';
+                    changeCell.textContent = changeText;
+                    changeCell.className = change > 0 ? 'text-success' : change < 0 ? 'text-danger' : '';
+                }
+
+                previousRates[currency] = rate;
+            });
+
+            document.getElementById('lastUpdateTime').textContent = 
+                `Son Güncelleme: ${new Date().toLocaleTimeString()}`;
+        });
+
+        connection.start()
+            .then(() => console.log("SignalR Bağlantısı Kuruldu"))
+            .catch(err => console.error(err));
+
+        // Her 10 saniyede bir kategori istatistiklerini güncelle
+        setInterval(async () => {
+            try {
+                const response = await fetch('/Dashboard/GetCategoryStats');
+                const stats = await response.json();
+                
+                chart.data.labels = stats.map(c => c.categoryName);
+                chart.data.datasets[0].data = stats.map(c => c.productCount);
+                chart.update();
+            } catch (error) {
+                console.error('Kategori istatistikleri güncellenirken hata:', error);
+            }
+        }, 10000);
+    </script>
+} 

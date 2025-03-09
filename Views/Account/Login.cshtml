@@ -1,0 +1,50 @@
+@{
+    ViewData["Title"] = "Giriş";
+    Layout = "_AuthLayout";
+}
+
+<div class="login-box">
+    <div class="card">
+        <div class="card-body login-card-body">
+            <div class="login-logo mb-4">
+                <img src="~/images/logo.png" alt="Logo" class="brand-image" style="max-height: 100px;">
+            </div>
+            <p class="login-box-msg">Oturum açmak için giriş yapın</p>
+
+            <form asp-controller="Account" asp-action="Login" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="input-group mb-3">
+                    <input type="text" name="username" class="form-control" placeholder="Kullanıcı Adı" required>
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group mb-3">
+                    <input type="password" name="password" class="form-control" placeholder="Şifre" required>
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary btn-block">Giriş Yap</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

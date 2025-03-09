@@ -1,0 +1,219 @@
+trigger:
+  branches:
+    include:
+    - main
+    - develop
+  paths:
+    exclude:
+    - docs/*
+    - README.md
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  dotNetVersion: '7.0.x'
+  azureSubscription: 'AzureServiceConnection'
+  webAppNameDev: 'cafe-menu-dev'
+  webAppNameProd: 'cafe-menu-prod'
+  sqlServerNameDev: 'cafe-menu-sql-dev'
+  sqlServerNameProd: 'cafe-menu-sql-prod'
+  sqlDatabaseName: 'CafeMenuDB'
+  sqlAdminUsername: '$(SQL_ADMIN_USERNAME)'
+  sqlAdminPassword: '$(SQL_ADMIN_PASSWORD)'
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - task: UseDotNet@2
+      inputs:
+        version: $(dotNetVersion)
+        includePreviewVersions: true
+
+    - task: NuGetToolInstaller@1
+
+    - task: NuGetCommand@2
+      inputs:
+        restoreSolution: '$(solution)'
+
+    - task: VSBuild@1
+      inputs:
+        solution: '$(solution)'
+        msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
+        platform: '$(buildPlatform)'
+        configuration: '$(buildConfiguration)'
+
+    - task: VSTest@2
+      inputs:
+        platform: '$(buildPlatform)'
+        configuration: '$(buildConfiguration)'
+        
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
+        
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.SourcesDirectory)/SQL'
+        ArtifactName: 'sql-scripts'
+        publishLocation: 'Container'
+
+- stage: Deploy_Dev
+  dependsOn: Build
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+  jobs:
+  - deployment: DeployWebApp
+    pool:
+      vmImage: 'windows-latest'
+    environment: 'development'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureWebApp@1
+            displayName: 'Deploy Web App to Dev'
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              appType: 'webApp'
+              appName: '$(webAppNameDev)'
+              package: '$(Pipeline.Workspace)/drop/**/*.zip'
+              deploymentMethod: 'auto'
+              
+  - job: DeployDatabase
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'sql-scripts'
+        downloadPath: '$(System.ArtifactsDirectory)'
+        
+    - task: SqlAzureDacpacDeployment@1
+      displayName: 'Execute SQL Scripts'
+      inputs:
+        azureSubscription: '$(azureSubscription)'
+        AuthenticationType: 'server'
+        ServerName: '$(sqlServerNameDev).database.windows.net'
+        DatabaseName: '$(sqlDatabaseName)'
+        SqlUsername: '$(sqlAdminUsername)'
+        SqlPassword: '$(sqlAdminPassword)'
+        deployType: 'SqlTask'
+        SqlFile: '$(System.ArtifactsDirectory)/sql-scripts/Tables.sql'
+        IpDetectionMethod: 'AutoDetect'
+        
+    - task: SqlAzureDacpacDeployment@1
+      displayName: 'Execute Stored Procedures'
+      inputs:
+        azureSubscription: '$(azureSubscription)'
+        AuthenticationType: 'server'
+        ServerName: '$(sqlServerNameDev).database.windows.net'
+        DatabaseName: '$(sqlDatabaseName)'
+        SqlUsername: '$(sqlAdminUsername)'
+        SqlPassword: '$(sqlAdminPassword)'
+        deployType: 'SqlTask'
+        SqlFile: '$(System.ArtifactsDirectory)/sql-scripts/StoredProcedures.sql'
+        IpDetectionMethod: 'AutoDetect'
+        
+  - job: SmokeTest
+    dependsOn: DeployWebApp
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: |
+        echo "Running smoke tests on development environment"
+        curl -s -o /dev/null -w "%{http_code}" https://$(webAppNameDev).azurewebsites.net/health | grep 200
+      displayName: 'Run Smoke Tests'
+
+- stage: Deploy_Prod
+  dependsOn: Build
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  jobs:
+  - deployment: DeployWebApp
+    pool:
+      vmImage: 'windows-latest'
+    environment: 'production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureWebApp@1
+            displayName: 'Deploy Web App to Production'
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              appType: 'webApp'
+              appName: '$(webAppNameProd)'
+              package: '$(Pipeline.Workspace)/drop/**/*.zip'
+              deploymentMethod: 'auto'
+              
+  - job: DeployDatabase
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'sql-scripts'
+        downloadPath: '$(System.ArtifactsDirectory)'
+        
+    - task: SqlAzureDacpacDeployment@1
+      displayName: 'Execute SQL Scripts'
+      inputs:
+        azureSubscription: '$(azureSubscription)'
+        AuthenticationType: 'server'
+        ServerName: '$(sqlServerNameProd).database.windows.net'
+        DatabaseName: '$(sqlDatabaseName)'
+        SqlUsername: '$(sqlAdminUsername)'
+        SqlPassword: '$(sqlAdminPassword)'
+        deployType: 'SqlTask'
+        SqlFile: '$(System.ArtifactsDirectory)/sql-scripts/Tables.sql'
+        IpDetectionMethod: 'AutoDetect'
+        
+    - task: SqlAzureDacpacDeployment@1
+      displayName: 'Execute Stored Procedures'
+      inputs:
+        azureSubscription: '$(azureSubscription)'
+        AuthenticationType: 'server'
+        ServerName: '$(sqlServerNameProd).database.windows.net'
+        DatabaseName: '$(sqlDatabaseName)'
+        SqlUsername: '$(sqlAdminUsername)'
+        SqlPassword: '$(sqlAdminPassword)'
+        deployType: 'SqlTask'
+        SqlFile: '$(System.ArtifactsDirectory)/sql-scripts/StoredProcedures.sql'
+        IpDetectionMethod: 'AutoDetect'
+        
+  - job: SmokeTest
+    dependsOn: DeployWebApp
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: |
+        echo "Running smoke tests on production environment"
+        curl -s -o /dev/null -w "%{http_code}" https://$(webAppNameProd).azurewebsites.net/health | grep 200
+      displayName: 'Run Smoke Tests'
+      
+  - job: CanaryTest
+    dependsOn: SmokeTest
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: |
+        echo "Running canary tests on production environment"
+        for i in {1..10}; do
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://$(webAppNameProd).azurewebsites.net/)
+          if [ "$response" != "200" ]; then
+            echo "Canary test failed with status code: $response"
+            exit 1
+          fi
+          sleep 5
+        done
+        echo "Canary tests passed successfully"
+      displayName: 'Run Canary Tests' 

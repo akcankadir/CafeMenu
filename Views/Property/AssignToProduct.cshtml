@@ -1,0 +1,67 @@
+@model IEnumerable<dynamic>
+
+@{
+    ViewData["Title"] = "Ürün Özellikleri";
+    var product = ViewBag.Product as CafeMenu.Models.Product;
+}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Ürün Özellikleri: @product.ProductName</h3>
+        </div>
+        <div class="card-body">
+            <form asp-action="AssignToProduct" method="post">
+                <input type="hidden" name="productId" value="@product.ProductId" />
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Seç</th>
+                                <th>Anahtar</th>
+                                <th>Değer</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="selectedProperties" 
+                                                   value="@item.PropertyId" @(item.IsAssigned ? "checked" : "") />
+                                        </div>
+                                    </td>
+                                    <td>@item.Key</td>
+                                    <td>@item.Value</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="form-group mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Özellikleri Kaydet
+                    </button>
+                    <a asp-controller="Product" asp-action="Edit" asp-route-id="@product.ProductId" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Ürüne Dön
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.table').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Turkish.json"
+                }
+            });
+        });
+    </script>
+} 

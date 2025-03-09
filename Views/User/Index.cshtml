@@ -1,0 +1,95 @@
+@model IEnumerable<CafeMenu.Models.User>
+@{
+    ViewData["Title"] = "Kullanıcı Yönetimi";
+}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Kullanıcılar</h3>
+            <div class="card-tools">
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Yeni Kullanıcı
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            }
+
+            <table id="usersTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Kullanıcı Adı</th>
+                        <th>Ad Soyad</th>
+                        <th>E-posta</th>
+                        <th>Roller</th>
+                        <th>Durum</th>
+                        <th>Son Giriş</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td>@user.Username</td>
+                            <td>@user.FullName</td>
+                            <td>@user.Email</td>
+                            <td>@string.Join(", ", user.UserRoles?.Select(r => r.Role.Name) ?? new string[] { })</td>
+                            <td>
+                                @if (user.IsActive)
+                                {
+                                    <span class="badge badge-success">Aktif</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-danger">Pasif</span>
+                                }
+                            </td>
+                            <td>@user.CreatedDate.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@user.UserId" class="btn btn-info btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete(@user.UserId)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<form id="deleteForm" asp-action="Delete" method="post">
+    <input type="hidden" id="userId" name="id" value="" />
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#usersTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Turkish.json"
+                }
+            });
+        });
+
+        function confirmDelete(id) {
+            if (confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')) {
+                $('#userId').val(id);
+                $('#deleteForm').submit();
+            }
+        }
+    </script>
+} 

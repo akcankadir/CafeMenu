@@ -1,0 +1,161 @@
+@model CafeMenu.Models.ViewModels.CustomerHomeViewModel
+@{
+    ViewData["Title"] = "Menü";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Kategoriler -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Kategoriler</h3>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <a href="@Url.Action("Index", new { currency = Model.SelectedCurrency })" 
+                           class="list-group-item list-group-item-action active">
+                            Tüm Ürünler
+                        </a>
+                        @foreach (var category in Model.Categories)
+                        {
+                            <a href="@Url.Action("Category", new { id = category.CategoryId, currency = Model.SelectedCurrency })" 
+                               class="list-group-item list-group-item-action">
+                                @category.CategoryName
+                            </a>
+                            @foreach (var subCategory in category.SubCategories)
+                            {
+                                <a href="@Url.Action("Category", new { id = subCategory.CategoryId, currency = Model.SelectedCurrency })" 
+                                   class="list-group-item list-group-item-action pl-4">
+                                    @subCategory.CategoryName
+                                </a>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ürünler -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="card-title">Öne Çıkan Ürünler</h3>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                Para Birimi: @Model.SelectedCurrency
+                            </button>
+                            <div class="dropdown-menu">
+                                @foreach (var rate in Model.ExchangeRates)
+                                {
+                                    <a class="dropdown-item @(Model.SelectedCurrency == rate.Key ? "active" : "")" 
+                                       href="@Url.Action("Index", new { currency = rate.Key })">
+                                        @rate.Key
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="productGrid">
+                        @foreach (var product in Model.FeaturedProducts)
+                        {
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    <img src="@(string.IsNullOrEmpty(product.ImagePath) ? "/images/no-image.png" : product.ImagePath)" 
+                                         class="card-img-top" alt="@product.ProductName"
+                                         style="height: 200px; object-fit: cover;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">@product.ProductName</h5>
+                                        <p class="card-text">
+                                            <small class="text-muted">@product.CategoryName</small>
+                                        </p>
+                                        <p class="card-text">
+                                            <strong>@product.FormattedPrice</strong>
+                                        </p>
+                                        <a href="@Url.Action("Product", new { id = product.ProductId, currency = Model.SelectedCurrency })" 
+                                           class="btn btn-primary">
+                                            Detaylar
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Yeni Ürünler -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3 class="card-title">Yeni Ürünler</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach (var product in Model.NewProducts)
+                        {
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    <img src="@(string.IsNullOrEmpty(product.ImagePath) ? "/images/no-image.png" : product.ImagePath)" 
+                                         class="card-img-top" alt="@product.ProductName"
+                                         style="height: 200px; object-fit: cover;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">@product.ProductName</h5>
+                                        <p class="card-text">
+                                            <small class="text-muted">@product.CategoryName</small>
+                                        </p>
+                                        <p class="card-text">
+                                            <strong>@product.FormattedPrice</strong>
+                                        </p>
+                                        <a href="@Url.Action("Product", new { id = product.ProductId, currency = Model.SelectedCurrency })" 
+                                           class="btn btn-primary">
+                                            Detaylar
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        // SignalR bağlantısı
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/exchangeRateHub")
+            .build();
+
+        let currentRates = @Html.Raw(Json.Serialize(Model.ExchangeRates));
+        const selectedCurrency = '@Model.SelectedCurrency';
+
+        connection.on("ReceiveExchangeRates", (rates) => {
+            currentRates = rates;
+            updatePrices();
+        });
+
+        connection.start()
+            .then(() => console.log("SignalR Bağlantısı Kuruldu"))
+            .catch(err => console.error(err));
+
+        function updatePrices() {
+            const products = document.querySelectorAll('[data-price]');
+            products.forEach(product => {
+                const tryPrice = parseFloat(product.dataset.price);
+                if (selectedCurrency !== 'TRY') {
+                    const rate = currentRates[selectedCurrency];
+                    if (rate) {
+                        const convertedPrice = tryPrice / rate;
+                        product.textContent = `${convertedPrice.toFixed(2)} ${selectedCurrency}`;
+                    }
+                }
+            });
+        }
+    </script>
+} 
