@@ -37,7 +37,7 @@ Proje, Clean Architecture prensiplerine uygun olarak geliştirilmiştir:
 
 ```bash
 # Projeyi klonlayın
-git clone https://github.com/yourusername/CafeMenu.git
+git clone https://github.com/akcankadir/CafeMenu.git
 
 # Proje dizinine gidin
 cd CafeMenu
