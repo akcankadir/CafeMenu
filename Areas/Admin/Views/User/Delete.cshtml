@@ -1,0 +1,56 @@
+@model CafeMenu.Models.User
+@{
+    ViewData["Title"] = "Kullanıcı Sil";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Kullanıcı Silme Onayı</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> <strong>@Model.Name (@Model.UserName)</strong> kullanıcısını silmek istediğinizden emin misiniz?
+                        <p class="mt-2 mb-0">Bu işlem geri alınamaz.</p>
+                    </div>
+                    
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-sm-4">Kullanıcı ID:</dt>
+                                <dd class="col-sm-8">@Model.UserId</dd>
+                                
+                                <dt class="col-sm-4">Ad Soyad:</dt>
+                                <dd class="col-sm-8">@Model.Name</dd>
+                                
+                                <dt class="col-sm-4">Kullanıcı Adı:</dt>
+                                <dd class="col-sm-8">@Model.UserName</dd>
+                                
+                                <dt class="col-sm-4">E-posta:</dt>
+                                <dd class="col-sm-8">@Model.Email</dd>
+                                
+                                <dt class="col-sm-4">Rol:</dt>
+                                <dd class="col-sm-8">@(Model.IsAdmin ? "Yönetici" : "Kullanıcı")</dd>
+                            </dl>
+                        </div>
+                    </div>
+                    
+                    <form asp-area="Admin" asp-controller="User" asp-action="DeleteConfirmed" method="post" class="mt-4">
+                        <input type="hidden" name="id" value="@Model.UserId" />
+                        
+                        <div class="d-flex justify-content-between">
+                            <a asp-area="Admin" asp-controller="User" asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Geri Dön
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Kullanıcıyı Sil
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

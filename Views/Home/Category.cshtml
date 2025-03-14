@@ -1,23 +1,26 @@
 @model List<CafeMenu.Models.Product>
 @{
-    ViewData["Title"] = ViewBag.Category.CategoryName;
+    ViewData["Title"] = ViewBag.Category?.CategoryName ?? "Kategori";
     var category = ViewBag.Category as CafeMenu.Models.Category;
 }
 
 <div class="container">
-    <h2>@category.CategoryName</h2>
-    
-    @if (!string.IsNullOrEmpty(category.ParentCategoryName))
+    @if (category != null)
     {
+        <h2>@category.CategoryName</h2>
         <p>
-            <a asp-controller="Home" asp-action="Category" asp-route-id="@category.ParentCategoryId">
-                <i class="bi bi-arrow-left"></i> @category.ParentCategoryName
+            <a asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-arrow-left">Menü</i>
             </a>
         </p>
     }
-    
+    else
+    {
+        <h2>Kategori Bulunamadı</h2>
+    }
+
     <div class="row mt-4">
-        @if (Model.Any())
+        @if (Model != null && Model.Any())
         {
             @foreach (var product in Model)
             {
@@ -38,7 +41,7 @@
                             <p class="card-text text-primary fw-bold">@product.Price.ToString("C")</p>
                         </div>
                         <div class="card-footer">
-                            <a asp-controller="Home" asp-action="Product" asp-route-id="@product.ProductId" class="btn btn-primary">
+                            <a asp-area="" asp-controller="Home" asp-action="Product" asp-route-id="@product.ProductId" class="btn btn-primary">
                                 Detaylar
                             </a>
                         </div>

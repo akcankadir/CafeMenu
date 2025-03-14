@@ -214,7 +214,7 @@ BEGIN
            c.CategoryName
     FROM Product p
     INNER JOIN Category c ON p.CategoryId = c.CategoryId
-    WHERE p.CategoryId = @CategoryId AND p.IsDeleted = 0;
+    WHERE p.CategoryId = @CategoryId OR  c.ParentCategoryId = @CategoryId  AND p.IsDeleted = 0;
 END
 GO
 

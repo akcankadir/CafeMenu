@@ -1,0 +1,177 @@
+﻿Bu proje, bir kafe menü yönetim sistemi oluşturmayı hedeflemektedir. Sistem, yönetici ve müşteri panelleri olmak üzere iki ana bölümden oluşmaktadır. Yönetici paneli, kullanıcıların veritabanındaki tüm tablolarda CRUD (Create, Read, Update, Delete) işlemleri yapabilmesini sağlarken, müşteri paneli ise kullanıcıların sadece ürünleri görüntüleyebileceği bir arayüz sunmaktadır. Proje, .NET Core 8 (C#) ve MSSQL teknolojileri kullanılarak geliştirilecektir. Ayrıca, Entity Framework Core ile Db-First yaklaşımı benimsenmiş ve CRUD işlemleri için stored procedure'ler (sp) kullanılacaktır.
+
+### **Proje Analizi**
+
+#### **1. Yönetici Paneli**
+- **CRUD İşlemleri:** Yönetici paneli, kullanıcıların tüm tablolarda (User, Category, Product, Property, ProductProperty) CRUD işlemleri yapabilmesini sağlayacak. Bu işlemler, stored procedure'ler aracılığıyla gerçekleştirilecek.
+- **Admin Paneli:** Admin paneline erişim, kullanıcı adı ve şifre ile sağlanacak. Bu panel, yöneticilerin kafe menüsünü yönetebilmesi için gerekli tüm araçları içerecek.
+
+#### **2. Müşteri Paneli**
+- **Ürün Görüntüleme:** Müşteriler, kafe menüsündeki ürünleri sadece görüntüleyebilecek. Bu panelde, kullanıcıların giriş yapmasına veya şifre girmesine gerek yoktur.
+- **Anasayfa:** Müşteri paneli, anasayfa olarak belirlenmiştir. Bu sayfada, kategoriler, ürünler ve ürün özellikleri (isDeleted = false olanlar) görüntülenebilecek.
+- **Kategori ve Ürün Yapısı:** Kategoriler hiyerarşik bir yapıda olabilir (örneğin, "Sıcak İçecekler" ana kategorisi altında "Kahveler" ve "Çaylar" gibi alt kategoriler bulunabilir). Ürünler, bu kategorilere bağlı olarak listelenecek.
+
+#### **3. Veritabanı Yapısı**
+- **User Tablosu:** Sistemdeki kullanıcıların bilgilerini tutar. Yönetici ve diğer kullanıcılar bu tabloda kayıtlıdır.
+- **Category Tablosu:** Kafe menüsündeki kategorileri tutar. Hiyerarşik yapıyı destekler (ParentCategoryId ile).
+- **Product Tablosu:** Kafe menüsündeki ürünleri tutar. Her ürün bir kategoriye bağlıdır.
+- **Property Tablosu:** Ürünlerin özelliklerini tutar (örneğin, kafein oranı, sıcaklık, şeker içeriği gibi).
+- **ProductProperty Tablosu:** Ürünler ve özellikler arasındaki ilişkiyi tutar.
+
+#### **4. Teknolojik Gereksinimler**
+- **.NET Core 8 (C#):** Proje, .NET Core 8 ile geliştirilecek. Bu, modern ve yüksek performanslı bir web uygulaması oluşturmak için uygun bir çerçevedir.
+- **MSSQL:** Veritabanı olarak MSSQL kullanılacak. Bu, güçlü ve ölçeklenebilir bir veritabanı yönetim sistemidir.
+- **Entity Framework Core (Db-First):** Veritabanı önce yaklaşımı kullanılacak. Bu, mevcut veritabanı yapısına göre modellerin otomatik olarak oluşturulmasını sağlar.
+- **Stored Procedure'ler (sp):** CRUD işlemleri için stored procedure'ler kullanılacak. Bu, veritabanı işlemlerinin daha güvenli ve performanslı olmasını sağlar.
+
+#### **5. Proje Yapısı**
+- **db Klasörü:** Veritabanı script dosyaları (CREATE TABLE ve stored procedure'ler) bu klasörde tutulacak. Bu, projenin taşınabilirliğini ve yönetilebilirliğini artırır.
+- **DefaultConnection:** Veritabanı bağlantı bilgileri, appsettings.json dosyasında tutulacak. Bu, farklı ortamlarda (development, production) farklı veritabanları kullanılmasını kolaylaştırır.
+
+#### **6. Örnek Veriler**
+- **Kullanıcılar:** Sistemde iki kullanıcı tanımlanmıştır: Admin ve Barista.
+- **Kategoriler:** Kafe menüsünde "Sıcak İçecekler", "Soğuk İçecekler" ve "Tatlılar" gibi kategoriler bulunmaktadır.
+- **Ürünler:** Her kategoriye ait ürünler tanımlanmıştır (örneğin, Espresso, Americano, Yeşil Çay, Portakal Suyu).
+- **Özellikler:** Ürünlerin özellikleri (kafein oranı, sıcaklık, şeker içeriği gibi) tanımlanmıştır.
+
+### **Sonuç**
+Bu proje, bir kafenin menü yönetimini kolaylaştırmak için tasarlanmıştır. Yönetici paneli, kullanıcıların menüyü kolayca yönetebilmesini sağlarken, müşteri paneli, müşterilerin menüyü hızlı ve kolay bir şekilde görüntüleyebilmesini sağlar. Proje, modern teknolojiler ve iyi bir veritabanı yapısı kullanılarak geliştirilecektir. Bu, projenin hem güvenilir hem de ölçeklenebilir olmasını sağlayacaktır.
+
+
+Projenin detaylı analizine **field isimleri** ve **gerekli stored procedure (SP) isimleri** de ekleyerek devam edelim. Bu bilgiler, projenin veritabanı ve iş mantığı kısmını daha net anlamanıza yardımcı olacaktır.
+
+---
+
+### **Veritabanı Tablo Tanımları ve Field İsimleri**
+
+#### **1. User Tablosu**
+- **UserId:** Kullanıcının benzersiz kimliği (INT, PRIMARY KEY, IDENTITY).
+- **Name:** Kullanıcının tam adı (NVARCHAR(100), NOT NULL).
+- **UserName:** Kullanıcı adı (NVARCHAR(50), UNIQUE, NOT NULL).
+- **Password:** Kullanıcı şifresi (NVARCHAR(255), NOT NULL).
+
+#### **2. Category Tablosu**
+- **CategoryId:** Kategorinin benzersiz kimliği (INT, PRIMARY KEY, IDENTITY).
+- **CategoryName:** Kategori adı (NVARCHAR(100), NOT NULL).
+- **ParentCategoryId:** Üst kategori kimliği (INT, NULL). Hiyerarşik yapı için kullanılır.
+- **IsDeleted:** Kategorinin silinip silinmediğini belirten flag (BIT, DEFAULT 0).
+- **CreatedDate:** Kategorinin oluşturulma tarihi (DATETIME, DEFAULT GETDATE()).
+- **CreatedUserId:** Kategoriyi oluşturan kullanıcının kimliği (INT, NOT NULL).
+
+#### **3. Product Tablosu**
+- **ProductId:** Ürünün benzersiz kimliği (INT, PRIMARY KEY, IDENTITY).
+- **ProductName:** Ürün adı (NVARCHAR(100), NOT NULL).
+- **CategoryId:** Ürünün bağlı olduğu kategori kimliği (INT, NOT NULL).
+- **Price:** Ürün fiyatı (DECIMAL(10,2), NOT NULL).
+- **ImagePath:** Ürün resminin dosya yolu (NVARCHAR(255), NULLABLE.
+- **IsDeleted:** Ürünün silinip silinmediğini belirten flag (BIT, DEFAULT 0).
+- **CreatedDate:** Ürünün oluşturulma tarihi (DATETIME, DEFAULT GETDATE()).
+- **CreatedUserId:** Ürünü oluşturan kullanıcının kimliği (INT, NOT NULL).
+
+#### **4. Property Tablosu**
+- **PropertyId:** Özelliğin benzersiz kimliği (INT, PRIMARY KEY, IDENTITY).
+- **Key:** Özelliğin adı (NVARCHAR(100), NOT NULL).
+- **Value:** Özelliğin değeri (NVARCHAR(255), NOT NULL.
+
+#### **5. ProductProperty Tablosu**
+- **ProductPropertyId:** Ürün-özellik ilişkisinin benzersiz kimliği (INT, PRIMARY KEY, IDENTITY).
+- **ProductId:** Ürün kimliği (INT, NOT NULL).
+- **PropertyId:** Özellik kimliği (INT, NOT NULL).
+
+---
+
+### **Gerekli Stored Procedure (SP) İsimleri ve Açıklamaları**
+
+#### **1. User Tablosu İçin SP'ler**
+- **sp_User_GetAll:** Tüm kullanıcıları getirir.
+- **sp_User_GetById:** Belirli bir kullanıcıyı ID'ye göre getirir.
+- **sp_User_Insert:** Yeni bir kullanıcı ekler.
+- **sp_User_Update:** Mevcut bir kullanıcıyı günceller.
+- **sp_User_Delete:** Bir kullanıcıyı siler (soft delete için IsDeleted flag'ini günceller).
+
+#### **2. Category Tablosu İçin SP'ler**
+- **sp_Category_GetAll:** Tüm kategorileri getirir.
+- **sp_Category_GetById:** Belirli bir kategoriyi ID'ye göre getirir.
+- **sp_Category_Insert:** Yeni bir kategori ekler.
+- **sp_Category_Update:** Mevcut bir kategoriyi günceller.
+- **sp_Category_Delete:** Bir kategoriyi siler (soft delete için IsDeleted flag'ini günceller).
+
+#### **3. Product Tablosu İçin SP'ler**
+- **sp_Product_GetAll:** Tüm ürünleri getirir.
+- **sp_Product_GetById:** Belirli bir ürünü ID'ye göre getirir.
+- **sp_Product_GetByCategoryId:** Belirli bir kategoriye ait ürünleri getirir.
+- **sp_Product_Insert:** Yeni bir ürün ekler.
+- **sp_Product_Update:** Mevcut bir ürünü günceller.
+- **sp_Product_Delete:** Bir ürünü siler (soft delete için IsDeleted flag'ini günceller).
+
+#### **4. Property Tablosu İçin SP'ler**
+- **sp_Property_GetAll:** Tüm özellikleri getirir.
+- **sp_Property_GetById:** Belirli bir özelliği ID'ye göre getirir.
+- **sp_Property_Insert:** Yeni bir özellik ekler.
+- **sp_Property_Update:** Mevcut bir özelliği günceller.
+- **sp_Property_Delete:** Bir özelliği siler.
+
+#### **5. ProductProperty Tablosu İçin SP'ler**
+- **sp_ProductProperty_GetAll:** Tüm ürün-özellik ilişkilerini getirir.
+- **sp_ProductProperty_GetByProductId:** Belirli bir ürüne ait özellikleri getirir.
+- **sp_ProductProperty_Insert:** Yeni bir ürün-özellik ilişkisi ekler.
+- **sp_ProductProperty_Delete:** Bir ürün-özellik ilişkisini siler.
+
+---
+
+### **Örnek Stored Procedure (SP) Kodu**
+
+#### **sp_Product_GetAll**
+```sql
+CREATE PROCEDURE sp_Product_GetAll
+AS
+BEGIN
+    SELECT 
+        ProductId, 
+        ProductName, 
+        CategoryId, 
+        Price, 
+        ImagePath, 
+        IsDeleted, 
+        CreatedDate, 
+        CreatedUserId
+    FROM 
+        Product
+    WHERE 
+        IsDeleted = 0; -- Sadece silinmemiş ürünleri getir
+END
+```
+
+#### **sp_Product_Insert**
+```sql
+CREATE PROCEDURE sp_Product_Insert
+    @ProductName NVARCHAR(100),
+    @CategoryId INT,
+    @Price DECIMAL(10,2),
+    @ImagePath NVARCHAR(255),
+    @CreatedUserId INT
+AS
+BEGIN
+    INSERT INTO Product (ProductName, CategoryId, Price, ImagePath, CreatedUserId)
+    VALUES (@ProductName, @CategoryId, @Price, @ImagePath, @CreatedUserId);
+
+    SELECT SCOPE_IDENTITY(); -- Eklenen ürünün ID'sini döndür
+END
+```
+
+#### **sp_Product_Delete (Soft Delete)**
+```sql
+CREATE PROCEDURE sp_Product_Delete
+    @ProductId INT
+AS
+BEGIN
+    UPDATE Product
+    SET IsDeleted = 1
+    WHERE ProductId = @ProductId;
+END
+```
+
+---
+
+### **Sonuç**
+Bu analiz, projenin veritabanı yapısını, field isimlerini ve gerekli stored procedure'leri detaylı bir şekilde ortaya koymaktadır. SP'ler, CRUD işlemlerini yönetmek ve veritabanı işlemlerini daha güvenli hale getirmek için kullanılacaktır. Proje, bu yapı üzerine inşa edildiğinde hem yönetici hem de müşteri panelleri sorunsuz bir şekilde çalışacaktır.

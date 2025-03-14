@@ -23,7 +23,7 @@
                             @foreach (var subCategory in category.SubCategories)
                             {
                                 <li class="list-group-item">
-                                    <a asp-controller="Home" asp-action="Category" asp-route-id="@subCategory.CategoryId">
+                                    <a asp-area="" asp-controller="Home" asp-action="Category" asp-route-id="@subCategory.CategoryId">
                                         @subCategory.CategoryName
                                     </a>
                                 </li>
@@ -36,7 +36,7 @@
                     }
                 </div>
                 <div class="card-footer">
-                    <a asp-controller="Home" asp-action="Category" asp-route-id="@category.CategoryId" class="btn btn-primary">
+                    <a asp-area="" asp-controller="Home" asp-action="Category" asp-route-id="@category.CategoryId" class="btn btn-primary">
                         Ürünleri Görüntüle
                     </a>
                 </div>

@@ -1,0 +1,53 @@
+@model CafeMenu.Models.Category
+@{
+    ViewData["Title"] = "Kategori Sil";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Kategori Silme Onayı</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> <strong>@Model.CategoryName</strong> kategorisini silmek istediğinizden emin misiniz?
+                        <p class="mt-2 mb-0">Bu işlem geri alınamaz ve kategoriye ait tüm ürünler de silinecektir.</p>
+                    </div>
+                    
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-sm-4">Kategori ID:</dt>
+                                <dd class="col-sm-8">@Model.CategoryId</dd>
+                                
+                                <dt class="col-sm-4">Kategori Adı:</dt>
+                                <dd class="col-sm-8">@Model.CategoryName</dd>
+                                
+                                <dt class="col-sm-4">Üst Kategori:</dt>
+                                <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.ParentCategoryName) ? "-" : Model.ParentCategoryName)</dd>
+                                
+                                <dt class="col-sm-4">Oluşturulma Tarihi:</dt>
+                                <dd class="col-sm-8">@Model.CreatedDate.ToString("dd.MM.yyyy HH:mm")</dd>
+                            </dl>
+                        </div>
+                    </div>
+                    
+                    <form asp-area="Admin" asp-controller="Category" asp-action="Delete" method="post" class="mt-4">
+                        <input type="hidden" name="id" value="@Model.CategoryId" />
+                        
+                        <div class="d-flex justify-content-between">
+                            <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Geri Dön
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Kategoriyi Sil
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

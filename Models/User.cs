@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CafeMenu.Models
 {
@@ -17,5 +18,15 @@ namespace CafeMenu.Models
         [Required(ErrorMessage = "Şifre zorunludur.")]
         [StringLength(255, ErrorMessage = "Şifre en fazla 255 karakter olabilir.")]
         public string Password { get; set; } = string.Empty;
+        
+        // Veritabanında saklanmayan hesaplanmış özellikler
+        [NotMapped]
+        public bool IsAdmin => UserName?.ToLower() == "admin";
+        
+        [NotMapped]
+        public string FullName => $"{Name} ({UserName})";
+        
+        [NotMapped]
+        public string? Email => $"{UserName.ToLower()}@cafemenu.com";
     }
 } 

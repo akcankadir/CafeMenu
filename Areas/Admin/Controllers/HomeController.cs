@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CafeMenu.Controllers.Admin
+namespace CafeMenu.Areas.Admin.Controllers
 {
     [Authorize]
     [Area("Admin")]

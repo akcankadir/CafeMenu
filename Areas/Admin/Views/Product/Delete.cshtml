@@ -1,0 +1,68 @@
+@model CafeMenu.Models.Product
+@{
+    ViewData["Title"] = "Ürün Sil";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Ürün Silme Onayı</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> <strong>@Model.ProductName</strong> ürününü silmek istediğinizden emin misiniz?
+                        <p class="mt-2 mb-0">Bu işlem geri alınamaz.</p>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-4">
+                            @if (!string.IsNullOrEmpty(Model.ImagePath))
+                            {
+                                <img src="@Model.ImagePath" alt="@Model.ProductName" class="img-fluid rounded" />
+                            }
+                            else
+                            {
+                                <div class="bg-light d-flex align-items-center justify-content-center rounded" style="height: 200px;">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-8">
+                            <dl class="row">
+                                <dt class="col-sm-4">Ürün ID:</dt>
+                                <dd class="col-sm-8">@Model.ProductId</dd>
+                                
+                                <dt class="col-sm-4">Ürün Adı:</dt>
+                                <dd class="col-sm-8">@Model.ProductName</dd>
+                                
+                                <dt class="col-sm-4">Kategori:</dt>
+                                <dd class="col-sm-8">@Model.CategoryName</dd>
+                                
+                                <dt class="col-sm-4">Fiyat:</dt>
+                                <dd class="col-sm-8">@Model.Price.ToString("C")</dd>
+                                
+                                <dt class="col-sm-4">Oluşturulma Tarihi:</dt>
+                                <dd class="col-sm-8">@Model.CreatedDate.ToString("dd.MM.yyyy HH:mm")</dd>
+                            </dl>
+                        </div>
+                    </div>
+                    
+                    <form asp-area="Admin" asp-controller="Product" asp-action="Delete" method="post" class="mt-4">
+                        <input type="hidden" name="id" value="@Model.ProductId" />
+                        
+                        <div class="d-flex justify-content-between">
+                            <a asp-area="Admin" asp-controller="Product" asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Geri Dön
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Ürünü Sil
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

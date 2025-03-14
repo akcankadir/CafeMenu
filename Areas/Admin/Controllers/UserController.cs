@@ -3,7 +3,7 @@ using CafeMenu.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CafeMenu.Controllers.Admin
+namespace CafeMenu.Areas.Admin.Controllers
 {
     [Authorize]
     [Area("Admin")]
@@ -76,7 +76,7 @@ namespace CafeMenu.Controllers.Admin
             return View(user);
         }
 
-        [HttpPost, ActionName("Delete")]
+        [HttpPost, ActionName("DeleteConfirmed")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {

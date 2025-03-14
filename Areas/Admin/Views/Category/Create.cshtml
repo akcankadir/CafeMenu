@@ -1,0 +1,45 @@
+@model CafeMenu.Models.Category
+@{
+    ViewData["Title"] = "Yeni Kategori";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Yeni Kategori Ekle</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-area="Admin" asp-controller="Category" asp-action="Create" method="post">
+                        <div class="mb-3">
+                            <label asp-for="CategoryName" class="form-label">Kategori Adı</label>
+                            <input asp-for="CategoryName" class="form-control" />
+                            <span asp-validation-for="CategoryName" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="ParentCategoryId" class="form-label">Üst Kategori</label>
+                            <select asp-for="ParentCategoryId" asp-items="ViewBag.Categories" class="form-select">
+                                <option value="">-- Üst Kategori Seçin (İsteğe Bağlı) --</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Geri Dön
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Kaydet
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 
