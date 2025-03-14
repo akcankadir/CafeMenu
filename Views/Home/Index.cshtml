@@ -1,0 +1,46 @@
+@model List<CafeMenu.Models.Category>
+@{
+    ViewData["Title"] = "Ana Sayfa";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Kafe Menümüze Hoş Geldiniz</h1>
+    <p>Lezzetli içeceklerimiz ve tatlılarımızı keşfedin.</p>
+</div>
+
+<div class="row mt-4">
+    @foreach (var category in Model.Where(c => c.ParentCategoryId == null))
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">@category.CategoryName</h5>
+                </div>
+                <div class="card-body">
+                    @if (category.SubCategories != null && category.SubCategories.Any())
+                    {
+                        <ul class="list-group">
+                            @foreach (var subCategory in category.SubCategories)
+                            {
+                                <li class="list-group-item">
+                                    <a asp-controller="Home" asp-action="Category" asp-route-id="@subCategory.CategoryId">
+                                        @subCategory.CategoryName
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="card-text">Bu kategoride alt kategori bulunmamaktadır.</p>
+                    }
+                </div>
+                <div class="card-footer">
+                    <a asp-controller="Home" asp-action="Category" asp-route-id="@category.CategoryId" class="btn btn-primary">
+                        Ürünleri Görüntüle
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div> 

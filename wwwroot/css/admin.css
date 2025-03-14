@@ -1,0 +1,85 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  white-space: nowrap;
+  line-height: 60px;
+}
+
+/* Admin Panel Stilleri */
+.navbar-dark {
+  background-color: #343a40 !important;
+}
+
+.card {
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  font-weight: bold;
+}
+
+.table {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.table thead th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.btn-icon {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.action-buttons .btn {
+  margin-right: 5px;
+}
+
+.action-buttons .btn:last-child {
+  margin-right: 0;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.required:after {
+  content: " *";
+  color: red;
+}
+
+.validation-summary-errors ul {
+  padding-left: 20px;
+  color: #dc3545;
+}
+
+.field-validation-error {
+  color: #dc3545;
+  font-size: 0.875rem;
+} 

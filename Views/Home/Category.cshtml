@@ -1,0 +1,58 @@
+@model List<CafeMenu.Models.Product>
+@{
+    ViewData["Title"] = ViewBag.Category.CategoryName;
+    var category = ViewBag.Category as CafeMenu.Models.Category;
+}
+
+<div class="container">
+    <h2>@category.CategoryName</h2>
+    
+    @if (!string.IsNullOrEmpty(category.ParentCategoryName))
+    {
+        <p>
+            <a asp-controller="Home" asp-action="Category" asp-route-id="@category.ParentCategoryId">
+                <i class="bi bi-arrow-left"></i> @category.ParentCategoryName
+            </a>
+        </p>
+    }
+    
+    <div class="row mt-4">
+        @if (Model.Any())
+        {
+            @foreach (var product in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        @if (!string.IsNullOrEmpty(product.ImagePath))
+                        {
+                            <img src="@product.ImagePath" class="card-img-top" alt="@product.ProductName" style="height: 200px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                            </div>
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title">@product.ProductName</h5>
+                            <p class="card-text text-primary fw-bold">@product.Price.ToString("C")</p>
+                        </div>
+                        <div class="card-footer">
+                            <a asp-controller="Home" asp-action="Product" asp-route-id="@product.ProductId" class="btn btn-primary">
+                                Detaylar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info">
+                    Bu kategoride henüz ürün bulunmamaktadır.
+                </div>
+            </div>
+        }
+    </div>
+</div> 
