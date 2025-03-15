@@ -86,9 +86,9 @@ namespace CafeMenu.Services
             return product;
         }
 
-        public async Task<List<Product>> GetProductsByCategoryIdAsync(int categoryId)
+        public async Task<List<ProductUS>> GetProductsByCategoryIdAsync(int categoryId,decimal DolarKuru)
         {
-            var products = new List<Product>();
+            var products = new List<ProductUS>();
 
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -103,7 +103,7 @@ namespace CafeMenu.Services
                     {
                         while (await reader.ReadAsync())
                         {
-                            products.Add(new Product
+                            products.Add(new ProductUS
                             {
                                 ProductId = reader.GetInt32(reader.GetOrdinal("ProductId")),
                                 ProductName = reader.GetString(reader.GetOrdinal("ProductName")),
@@ -113,7 +113,8 @@ namespace CafeMenu.Services
                                 ImagePath = reader.IsDBNull(reader.GetOrdinal("ImagePath")) ? null : reader.GetString(reader.GetOrdinal("ImagePath")),
                                 IsDeleted = reader.GetBoolean(reader.GetOrdinal("IsDeleted")),
                                 CreatedDate = reader.GetDateTime(reader.GetOrdinal("CreatedDate")),
-                                CreatedUserId = reader.GetInt32(reader.GetOrdinal("CreatedUserId"))
+                                CreatedUserId = reader.GetInt32(reader.GetOrdinal("CreatedUserId")),
+                                USPrice = reader.GetDecimal(reader.GetOrdinal("Price")) / DolarKuru
                             });
                         }
                     }

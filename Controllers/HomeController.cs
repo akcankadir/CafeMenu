@@ -9,11 +9,13 @@ namespace CafeMenu.Controllers
     {
         private readonly ICategoryService _categoryService;
         private readonly IProductService _productService;
+        private readonly IExchangeRateService _exchangeRateService;
 
-        public HomeController(ICategoryService categoryService, IProductService productService)
+        public HomeController(ICategoryService categoryService, IProductService productService, IExchangeRateService exchangeRateService)
         {
             _categoryService = categoryService;
             _productService = productService;
+            _exchangeRateService = exchangeRateService;
         }
 
         public async Task<IActionResult> Index()
@@ -30,7 +32,8 @@ namespace CafeMenu.Controllers
                 return NotFound();
             }
 
-            var products = await _productService.GetProductsByCategoryIdAsync(id);
+            decimal DolarKuru = await _exchangeRateService.GetDollarRateAsync();
+            var products = await _productService.GetProductsByCategoryIdAsync(id, DolarKuru);
             ViewBag.Category = category;
             return View(products);
         }
@@ -58,4 +61,4 @@ namespace CafeMenu.Controllers
         public string? RequestId { get; set; }
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
     }
-} 
+}

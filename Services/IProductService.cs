@@ -6,7 +6,7 @@ namespace CafeMenu.Services
     {
         Task<List<Product>> GetAllProductsAsync();
         Task<Product?> GetProductByIdAsync(int productId);
-        Task<List<Product>> GetProductsByCategoryIdAsync(int categoryId);
+        Task<List<ProductUS>> GetProductsByCategoryIdAsync(int categoryId,decimal DolarKuru);
         Task<int> CreateProductAsync(Product product);
         Task UpdateProductAsync(Product product);
         Task DeleteProductAsync(int productId);

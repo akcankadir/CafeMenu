@@ -1,4 +1,4 @@
-@model List<CafeMenu.Models.Product>
+@model List<CafeMenu.Models.ProductUS>
 @{
     ViewData["Title"] = ViewBag.Category?.CategoryName ?? "Kategori";
     var category = ViewBag.Category as CafeMenu.Models.Category;
@@ -38,7 +38,12 @@
                         }
                         <div class="card-body">
                             <h5 class="card-title">@product.ProductName</h5>
-                            <p class="card-text text-primary fw-bold">@product.Price.ToString("C")</p>
+                            <p class="card-text text-primary fw-bold">
+                                <span id="tlPrice" data-id="@product.ProductId" class="text-success fw-bold"> @product.Price </span><span> TL</span>
+                                (
+                                <span id="dolarPrice" data-id="@product.ProductId" class="text-success fw-bold"> @(product.USPrice.HasValue ? product.USPrice.Value.ToString("0.00") : "0.00")</span><span> $</span>
+                                )
+                            </p>
                         </div>
                         <div class="card-footer">
                             <a asp-area="" asp-controller="Home" asp-action="Product" asp-route-id="@product.ProductId" class="btn btn-primary">
@@ -58,4 +63,7 @@
             </div>
         }
     </div>
-</div> 
+</div>
+<script>
+   const exchangeRate = parseFloat(sessionStorage.getItem("usdToTry"));
+</script>

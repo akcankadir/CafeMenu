@@ -20,6 +20,9 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
+// Add ExchangeRateService for API
+builder.Services.AddHttpClient<IExchangeRateService, ExchangeRateService>();
+
 // Add authentication
 builder.Services.AddAuthentication(options =>
 {
